@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import Budget from "../models/Budget";
+import Expense from "../models/Expense";
 
 //En este caso se usaran clases, si colocalos static no es necesario instanciar
 
@@ -30,9 +31,16 @@ export class BudgetController {
         }
     }
 
-//OBTENER UN BUDGET POR SU ID
+//OBTENER UN BUDGET POR SU ID.
+//En este caso si queremos mandar llamar el gasto solo usamos: res.json(req.budget) y ya
+//Pero en este caso queremos incluir tambien los gastos que pertenecen a ese presupuesto a si que lo modificamos un poco
+
     static getById = async (req: Request, res: Response) => {
-        res.json(req.budget)
+//Para traernos la relacion con expense dependiendo el ID, le indicamos que incluya la relacion de "Expense" y ya solo mandamos llamar "budget"
+        const budget = await Budget.findByPk(req.budget.id, {
+            include: [Expense]
+        })
+        res.json(budget)
     }
 
 

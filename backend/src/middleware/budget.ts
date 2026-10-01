@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express'
-import { param, body } from 'express-validator'
+import { param, body, validationResult } from 'express-validator'
 import Budget from "../models/Budget";
 
 //run(req) es un método de express-validator que ejecuta manualmente una validación sobre una petición (req)
@@ -18,8 +18,12 @@ declare global {
 
 export const validateBudgetId = async (req: Request, res: Response, next: NextFunction) => {
      await param('budgetId').isInt().withMessage('ID no válido')
-    .custom(value => value > 0).withMessage('ID no valido').run(req),
+    .custom(value => value > 0).withMessage('ID no valido').run(req)
 
+    let errors = validationResult(req)
+    if (!errors.isEmpty()) {
+        return res.status(400).json({errors: errors.array()})
+    }
     next()
 }
 
@@ -42,6 +46,8 @@ export const validateBudgetExist = async (req: Request, res: Response, next: Nex
         return res.status(500).json("Error al obtener el presupuesto")
      }
 }
+
+//Esta validacion podemos hacerla generica para usarla en expenses tambien pero si ha futuro BUDGET agrega un campo nuevo tendriamos que hacer muchos cambios
 
 export const validateBudgetInput = async (req: Request, res: Response, next: NextFunction) => {
     await body('name').notEmpty().withMessage('Ingresa un nombre para el presupuesto').run(req)
